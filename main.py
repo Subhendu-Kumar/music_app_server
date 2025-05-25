@@ -1,61 +1,54 @@
-import bcrypt
-from prisma import Prisma
-from schemas import UserCreate, UserLogin
-from utils import hash_password, verify_password, create_access_token
-from fastapi import FastAPI, HTTPException
+from routes import auth
+from fastapi import FastAPI, Depends
+from utils.jwt_util import verify_token
+from contextlib import asynccontextmanager
+from utils.database_util import lifespan_manager
+from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI()
-db = Prisma()
+# Lifespan event handler
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    async with lifespan_manager():
+        yield
 
+# Create FastAPI instance with lifespan
+app = FastAPI(
+    version="1.0.0",
+    lifespan=lifespan,
+    title="Music App API",
+    description="A FastAPI application with Prisma & NeonDB",
+)
 
-@app.on_event("startup")
-async def startup():
-    await db.connect()
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+    allow_credentials=True,
+)
 
+# Include routers
+app.include_router(auth.router)
 
-@app.on_event("shutdown")
-async def shutdown():
-    await db.disconnect()
+# Root endpoint
+@app.get("/", tags=["Root"])
+async def root():
+    return {
+        "docs": "/docs",
+        "status": "running",
+        "message": "FastAPI With Prisma & NeonDB",
+    }
 
+# Health check endpoint
+@app.get("/health", tags=["Health"])
+async def health_check():
+    return {
+        "status": "healthy",
+        "message": "API is running successfully"
+    }
 
-@app.get("/")
-async def entry():
-    return {"message": "FastApi With Prisma & NeonDB"}
-
-
-@app.post("/signup", status_code=201)
-async def signup(user: UserCreate):
-    try:
-        existing_user = await db.user.find_unique(where={"email": user.email})
-        if existing_user:
-            raise HTTPException(status_code=400, detail="Email already registered")
-        hashed_password = hash_password(user.password)
-        created_user = await db.user.create(
-            data={
-                "name": user.name,
-                "email": user.email,
-                "password": hashed_password,
-            }
-        )
-        if not created_user:
-            raise HTTPException(status_code=500, detail="Failed to create user")
-        return {
-            "id": created_user.id,
-            "name": created_user.name,
-            "email": created_user.email,
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Internal Server Error")
-
-
-@app.post("/login", status_code=200)
-async def login(user: UserLogin):
-    db_user = await db.user.find_unique(where={"email": user.email})
-    if not db_user:
-        raise HTTPException(status_code=400, detail="Invalid email or password")
-    if not verify_password(user.password, db_user.password):
-        raise HTTPException(status_code=400, detail="Invalid email or password")
-    token = create_access_token(data={"user_id": db_user.id, "email": db_user.email})
-    return {"access_token": token, "message": "user loggedin successfully"}
+@app.post("/test")
+def create_quiz_with_ai(user_data: dict = Depends(verify_token)):
+    return {"message": "successfully", "user": user_data.get("user")}
