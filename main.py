@@ -48,7 +48,3 @@ async def health_check():
         "status": "healthy",
         "message": "API is running successfully"
     }
-
-@app.post("/test")
-def create_quiz_with_ai(user_data: dict = Depends(verify_token)):
-    return {"message": "successfully", "user": user_data.get("user")}
