@@ -23,8 +23,8 @@ async def song_upload(
         userId = user_data.get("user")["id"]
         if not userId:
             raise HTTPException(status_code=400, detail="Invalid access")
-        validate_file(song, ALLOWED_AUDIO_TYPES)
-        validate_file(thumbnail, ALLOWED_IMAGE_TYPES)
+        # validate_file(song, ALLOWED_AUDIO_TYPES)
+        # validate_file(thumbnail, ALLOWED_IMAGE_TYPES)
         if not artist or not song_name or not hex_color:
             raise HTTPException(status_code=400, detail="Missing required fields.")
         existing_song = await db.song.find_first(
