@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 # Database instance
 db = Prisma()
 
+
 @asynccontextmanager
 async def lifespan_manager():
     # Startup
@@ -13,6 +14,7 @@ async def lifespan_manager():
     # Shutdown
     await db.disconnect()
     print("Disconnected from database")
+
 
 def get_db():
     return db

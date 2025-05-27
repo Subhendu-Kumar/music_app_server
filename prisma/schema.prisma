@@ -13,4 +13,21 @@ model User {
   name     String
   email    String   @unique
   password String
+
+  // Relation: one user can have many songs
+  songs    Song[]
+}
+
+model Song {
+  id           String   @id @default(uuid()) @db.Uuid
+  song         String   // songUrl
+  thumbnail    String   // thumbnailUrl
+  artist       String
+  song_name    String
+  hex_color    String
+
+  userId       String   @db.Uuid
+  user         User     @relation(fields: [userId], references: [id])
+
+  createdAt    DateTime @default(now())
 }
