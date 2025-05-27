@@ -4,7 +4,8 @@ from utils.cloudinary_util import *
 from utils.database_util import get_db
 from utils.jwt_util import verify_token
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
-from utils.song_util import validate_file, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES
+
+# from utils.song_util import validate_file, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES
 
 router = APIRouter(prefix="/song", tags=["Songs"])
 
@@ -60,6 +61,20 @@ async def song_upload(
             }
         )
         return {"message": "Song uploaded successfully", "song": new_song}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Upload error: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
+@router.get("/list", status_code=200)
+async def list_all_songs(db=Depends(get_db), user_data: dict = Depends(verify_token)):
+    try:
+        songs = await db.song.find_many(order={"createdAt": "desc"})
+        if not songs:
+            raise HTTPException(status_code=404, detail="No songs found")
+        return songs
     except HTTPException:
         raise
     except Exception as e:
