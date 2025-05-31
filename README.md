@@ -150,13 +150,30 @@ Authorization: Bearer <your-access-token>
 ### Installation
 
 1. Clone the repository
-2. Install dependencies:
 
    ```bash
-   pip install fastapi prisma uvicorn python-multipart
+   git clone https://github.com/Subhendu-Kumar/music_app_server.git
    ```
 
-3. Set up your database connection with NeonDB & add `.env`
+2. Create a virtual environment
+
+   ```bash
+   python -m venv venv
+   ```
+
+3. Activate the virtual environment (Windows)
+
+   ```bash
+   venv\Scripts\activate
+   ```
+
+4. Install dependencies:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+5. Set up your database connection with NeonDB & add `.env`
 
    ```bash
    # Neon DB
@@ -173,15 +190,15 @@ Authorization: Bearer <your-access-token>
    CLOUDINARY_CLIENT_SECRET=<api secret>
    ```
 
-4. Run Prisma migrations:
+6. Run Prisma migrations:
 
    ```bash
-   prisma migrate dev
+   prisma migrate dev --name <name>
    ```
 
-5. Start the development server:
+7. Start the development server:
    ```bash
-   uvicorn main:app --reload
+   fastapi dev main.py
    ```
 
 The API will be available at `http://localhost:8000`
