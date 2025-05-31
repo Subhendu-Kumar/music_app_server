@@ -138,6 +138,7 @@ async def add_favorite(
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid access"
             )
+
         # Check if song exists
         song = await db.song.find_unique(where={"id": song_id})
         if not song:
@@ -156,18 +157,18 @@ async def add_favorite(
         )
 
         if existing_favorite:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Song already in favorites",
+            # Delete favorite
+            await db.favorite.delete(
+                where={"userId_songId": {"userId": userId, "songId": song_id}}
             )
-
-        # Create favorite
-        favorite = await db.favorite.create(
-            data={"userId": userId, "songId": song_id},
-            include={"song": True},
-        )
-
-        return favorite
+            return {"message": False}
+        else:
+            # Create favorite
+            await db.favorite.create(
+                data={"userId": userId, "songId": song_id},
+                include={"song": True},
+            )
+            return {"message": True}
 
     except HTTPException:
         raise
