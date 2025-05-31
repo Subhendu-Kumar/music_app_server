@@ -234,12 +234,12 @@ This endpoint can be used for monitoring, load balancer health checks, and deplo
 
 ## 📄 License
 
-[Add your license information here]
+[See the LICENSE File in the repo]
 
 ## 🤝 Contributing
 
-[Add contribution guidelines here]
+[Will br Added Soon...]
 
 ## 📞 Support
 
-[Add support/contact information here]
+[Email: subhendukumardutta330@gmail.com]
